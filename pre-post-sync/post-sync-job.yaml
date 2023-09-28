@@ -1,3 +1,4 @@
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -14,3 +15,25 @@ spec:
         command: ["sleep", "20"]
       restartPolicy: Never
   backoffLimit: 0
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  name: after-workflow
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  entrypoint: argosay
+  templates:
+    - name: argosay
+      container:
+        name: main
+        image: docker/whalesay:latest
+        command:
+          - bash
+          - -c
+        args:
+          - "sleep 10 && echo hey"
+---
